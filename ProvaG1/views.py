@@ -10,6 +10,15 @@ from .models import PessoaJuridica
 from .models import Autor
 from .models import Participante
 
+
+def inscricoes(id_evento):
+    part = Participante.objects.all()
+    cont = 0
+    for p in part:
+        if(p.id_evento == id_evento):
+            cont = cont + 1
+    return str(cont)
+
 def Eventos(request):
     html = "<h1>Lista de Eventos</h1>"
     lista = Evento.objects.all()
@@ -30,7 +39,7 @@ def Eventos(request):
                                      '<br/>Sigla: '+ evento.sigla+ '<br/>Data e Hora de Inicio: '+ str(evento.dataEHoradeInicio) +
                                      '<br/>Palavra Chave: ' + evento.palavraChave+ '<br/>Logotipo: '+ evento.logotipo + '<br/>Autor: '
                                      +  autor +'<br/>Cidade: ' + evento.cidade +'-'+ evento.uf + '<br/>Endereço: '+
-                                     evento.endereco+ '<br/>ISSN: '+ eventoCientifico )
+                                     evento.endereco+ '<br/>ISSN: '+ eventoCientifico + "<br/>Inscrições: " + inscricoes(evento.id))
 
     html += '<br/><h3>Para escolher um determinado evento, no navegador apague o "s/" de "eventos/"e acrescente na frente da url "/id"<h3>'
     return HttpResponse(html)
@@ -56,7 +65,7 @@ def EventoX(request, id):
                 '<br/>Sigla: ' + evento.sigla + '<br/>Data e Hora de Inicio: ' + str(evento.dataEHoradeInicio) +
                 '<br/>Palavra Chave: ' + evento.palavraChave + '<br/>Logotipo: ' + evento.logotipo + '<br/>Autor: '
                 + autor + '<br/>Cidade: ' + evento.cidade + '-' + evento.uf + '<br/>Endereço: ' +
-                evento.endereco + '<br/>ISSN: ' + eventoCientifico)
+                evento.endereco + '<br/>ISSN: ' + eventoCientifico + "<br/>Inscrições: " + inscricoes(evento.id))
 
     return HttpResponse(html)
 
@@ -138,7 +147,7 @@ def Recursos(request):
             '<br/>Sigla: ' + evento.sigla + '<br/>Data e Hora de Inicio: ' + str(evento.dataEHoradeInicio) +
             '<br/>Palavra Chave: ' + evento.palavraChave + '<br/>Logotipo: ' + evento.logotipo + '<br/>Autor: '
             + autor + '<br/>Cidade: ' + evento.cidade + '-' + evento.uf + '<br/>Endereço: ' +
-            evento.endereco + '<br/>ISSN: ' + eventoCientifico)
+            evento.endereco + '<br/>ISSN: ' + eventoCientifico + "<br/>Inscrições: " + inscricoes(evento.id))
 
 
     html += "<br/><br/><br/> <h1>Lista de Pessoas</h1>"
