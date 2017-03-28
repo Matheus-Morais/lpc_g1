@@ -15,7 +15,17 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+from ProvaG1.views import *
+
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    #url(r'^$', inicio, name='inicio'),
+    url(r'^recursos/', Recursos),
+    url(r'^eventos/', Eventos),
+    url(r'^pessoas/', Pessoas),
+    url(r'^artigos/', Artigos),
+    url(r'^evento/([0-9]{1})/', EventoX),
+    url(r'^pessoa/([0-9]{1})/', PessoaX),
+    url(r'^artigo/([0-9]{1})/', ArtigoX),
 ]
