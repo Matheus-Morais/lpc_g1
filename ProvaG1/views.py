@@ -13,10 +13,13 @@ from .models import Participante
 
 def inscricoes(id_evento):
     part = Participante.objects.all()
-    cont = 0
+    pessoas = PessoaFisica.objects.all()
+    cont = ''
     for p in part:
         if(p.id_evento_id == id_evento):
-            cont = cont + 1
+            for nome in pessoas:
+                if(nome.id == p.id_pessoaFisica.id):
+                    cont += '<br/>'+ nome.nome
     return str(cont)
 
 def Eventos(request):
