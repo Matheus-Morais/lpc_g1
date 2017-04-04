@@ -8,12 +8,11 @@ class Evento(models.Model):
     dataEHoradeInicio = models.DateTimeField('dataeHora_inicio', default=timezone.now)
     palavraChave = models.CharField('palavra_chave', max_length=200)
     logotipo = models.CharField('logotipo', max_length=200)
-    id_pessoa = models.IntegerField('id_pessoa', null = False)
+    id_pessoa = models.ForeignKey('Pessoa')
     cidade = models.CharField('cidade', max_length=200)
     uf = models.CharField('uf', max_length=200)
     endereco = models.CharField('endereco', max_length=200)
     cep = models.CharField('cep', max_length=200)
-    id_eventoCientifico = models.IntegerField('id_eventoCientifico', null = True)
 
 class Pessoa(models.Model):
     nome = models.CharField('nome', max_length=200)
@@ -21,7 +20,6 @@ class Pessoa(models.Model):
 
 class Autor(Pessoa):
     curriculo = models.CharField('curriculo', max_length=200)
-    id_artigo = models.IntegerField('id_artigo', null = True)
 
 class PessoaJuridica(Pessoa):
     cnpj = models.CharField('cnpj', max_length=200)
@@ -32,13 +30,17 @@ class PessoaFisica(Pessoa):
 
 class Participante(models.Model):
     dataEHoradeInscricao = models.DateTimeField('dataeHora_inscricao', default=timezone.now)
-    tipoInscricao = models.CharField('tipo_inscricao', max_length=200)
-    id_pessoaFisica = models.IntegerField('id_pessoaFisica', null = False)
-    id_evento = models.IntegerField('id_evento', null = False)
+    id_pessoaFisica = models.ForeignKey('PessoaFisica')
+    id_evento = models.ForeignKey('Evento')
+    id_tipoInscricao = models.ForeignKey('tipoInscricao', null = True)
+
+class tipoInscricao(models.Model):
+    tipo_Inscricao = models.CharField('tipo_inscricao', max_length=200)
 
 class EventoCientifico(Evento):
     issn = models.CharField('issn', max_length=200)
 
 class ArtigoCientifico(models.Model):
     titulo = models.CharField('titulo', max_length=200)
-    id_evento = models.IntegerField('id_evento', null = True)
+    evento = models.ForeignKey('Evento', null = True)
+    autores = models.ManyToManyField(Autor)

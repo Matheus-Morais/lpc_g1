@@ -15,7 +15,7 @@ def inscricoes(id_evento):
     part = Participante.objects.all()
     cont = 0
     for p in part:
-        if(p.id_evento == id_evento):
+        if(p.id_evento_id == id_evento):
             cont = cont + 1
     return str(cont)
 
@@ -25,12 +25,9 @@ def Eventos(request):
     eventoC = EventoCientifico.objects.all()
     pessoa = Pessoa.objects.all()
     for evento in lista:
-        #autor = Pessoa.objects.filter(id = evento.id_pessoa)
-        for autores in pessoa:
-            if(evento.id_pessoa == autores.id):
-                autor = autores.nome
         for cientifico in eventoC:
-            if(evento.id == cientifico.id):
+            x = cientifico.id
+            if(evento.id == x):
                 eventoCientifico = cientifico.issn
             else:
                 eventoCientifico = 'Não é evento cientifico'
@@ -38,7 +35,7 @@ def Eventos(request):
         html += '<li>{}</li>'.format('<br/>Nome do Evento: ' + evento.nome + '<br/>Evento Principal: '+ evento.eventoPrincipal +
                                      '<br/>Sigla: '+ evento.sigla+ '<br/>Data e Hora de Inicio: '+ str(evento.dataEHoradeInicio) +
                                      '<br/>Palavra Chave: ' + evento.palavraChave+ '<br/>Logotipo: '+ evento.logotipo + '<br/>Autor: '
-                                     +  autor +'<br/>Cidade: ' + evento.cidade +'-'+ evento.uf + '<br/>Endereço: '+
+                                     +  evento.id_pessoa.nome +'<br/>Cidade: ' + evento.cidade +'-'+ evento.uf + '<br/>Endereço: '+
                                      evento.endereco+ '<br/>ISSN: '+ eventoCientifico + "<br/>Inscrições: " + inscricoes(evento.id))
 
     html += '<br/><h3>Para escolher um determinado evento, no navegador apague o "s/" de "eventos/"e acrescente na frente da url "/id"<h3>'
@@ -49,23 +46,18 @@ def EventoX(request, id):
     evento = Evento.objects.get(pk=id)
     eventoC = EventoCientifico.objects.all()
     pessoa = Pessoa.objects.all()
-    #for evento in lista:
-        #if(evento.id == id):
-    for autores in pessoa:
-        if (evento.id_pessoa == autores.id):
-            autor = autores.nome
     for cientifico in eventoC:
-        if (evento.id == cientifico.id):
+        x = cientifico.id
+        if(evento.id == x):
             eventoCientifico = cientifico.issn
         else:
             eventoCientifico = 'Não é evento cientifico'
 
-    html += '<li>{}</li>'.format(
-                '<br/>Nome do Evento: ' + evento.nome + '<br/>Evento Principal: ' + evento.eventoPrincipal +
-                '<br/>Sigla: ' + evento.sigla + '<br/>Data e Hora de Inicio: ' + str(evento.dataEHoradeInicio) +
-                '<br/>Palavra Chave: ' + evento.palavraChave + '<br/>Logotipo: ' + evento.logotipo + '<br/>Autor: '
-                + autor + '<br/>Cidade: ' + evento.cidade + '-' + evento.uf + '<br/>Endereço: ' +
-                evento.endereco + '<br/>ISSN: ' + eventoCientifico + "<br/>Inscrições: " + inscricoes(evento.id))
+    html += '<li>{}</li>'.format('<br/>Nome do Evento: ' + evento.nome + '<br/>Evento Principal: '+ evento.eventoPrincipal +
+                                     '<br/>Sigla: '+ evento.sigla+ '<br/>Data e Hora de Inicio: '+ str(evento.dataEHoradeInicio) +
+                                     '<br/>Palavra Chave: ' + evento.palavraChave+ '<br/>Logotipo: '+ evento.logotipo + '<br/>Autor: '
+                                     +  evento.id_pessoa.nome +'<br/>Cidade: ' + evento.cidade +'-'+ evento.uf + '<br/>Endereço: '+
+                                     evento.endereco+ '<br/>ISSN: '+ eventoCientifico + "<br/>Inscrições: " + inscricoes(evento.id))
 
     return HttpResponse(html)
 
@@ -74,11 +66,20 @@ def Pessoas(request):
     lista = Pessoa.objects.all()
     pf = PessoaFisica.objects.all()
     pj = PessoaJuridica.objects.all()
+    au = Autor.objects.all()
+    pa = Participante.objects.all()
     for pessoa in lista:
+        for aut in au:
+            if(aut.id == pessoa.id):
+                tipo = 'Autor'
+                html += '<li>{}</li>'.format('<br/>Nome: '+ pessoa.nome +'<br/>Email: '+ pessoa.email + '<br/>Tipo: '+ tipo + '<br/>CPF: '+aut.curriculo)
+
+
         for pef in pf:
             if(pef.id == pessoa.id):
                 tipo = 'Pessoa Fisica'
                 html += '<li>{}</li>'.format('<br/>Nome: '+ pessoa.nome +'<br/>Email: '+ pessoa.email + '<br/>Tipo: '+ tipo + '<br/>CPF: '+pef.cpf)
+
         for pej in pj:
             if( pej.id == pessoa.id):
                 tipo = 'Pessoa Juridica'
@@ -91,7 +92,13 @@ def PessoaX(request, id):
     html = "<h1>Determinada Pessoa</h1>"
     pessoa = Pessoa.objects.get(pk=id)
     pf = PessoaFisica.objects.all()
+    au = Autor.objects.all()
     pj = PessoaJuridica.objects.all()
+    for aut in au:
+        if(aut.id == pessoa.id):
+            tipo = 'Autor'
+            html += '<li>{}</li>'.format('<br/>Nome: '+ pessoa.nome +'<br/>Email: '+ pessoa.email + '<br/>Tipo: '+ tipo + '<br/>CPF: '+aut.curriculo)
+
     for pef in pf:
         if (pef.id == pessoa.id):
             tipo = 'Pessoa Fisica'
@@ -107,22 +114,21 @@ def PessoaX(request, id):
 def Artigos(request):
     html = "<h1>Lista de Artigos</h1>"
     artigos = ArtigoCientifico.objects.all()
-    autores = Autor.objects.all()
+    x = 'Autores: '
     for artigo in artigos:
-        for autor in autores:
-            if(artigo.id == autor.id_artigo):
-                html += '<li>{}</li>'.format('<br/> Nome do Artigo: ' + artigo.titulo + "<br/> Autor: " + autor.nome + "<br/> Curriculo: "+ autor.curriculo)
+        for autor in artigo.autores.all():
+                x += autor.nome + " | "
+        html += '<li>{}</li>'.format('<br/> Nome do Artigo: ' + artigo.titulo + "<br/>"+x)
 
     return HttpResponse(html)
 
 def ArtigoX(request, id):
-    html = "<h1>Lista de Artigos</h1>"
+    html = "<h1>Artigo</h1>"
     artigo = ArtigoCientifico.objects.get(pk=id)
-    autores = Autor.objects.all()
-    for autor in autores:
-        if (artigo.id == autor.id_artigo):
-            html += '<li>{}</li>'.format(
-                '<br/> Nome do Artigo: ' + artigo.titulo + "<br/> Autor: " + autor.nome + "<br/> Curriculo: " + autor.curriculo)
+    x = 'Autores: '
+    for autor in artigo.autores.all():
+            x += autor.nome + " | "
+    html += '<li>{}</li>'.format('<br/> Nome do Artigo: ' + artigo.titulo + "<br/>"+x)
 
     return HttpResponse(html)
 
@@ -132,47 +138,48 @@ def Recursos(request):
     eventoC = EventoCientifico.objects.all()
     pessoa = Pessoa.objects.all()
     for evento in lista:
-        # autor = Pessoa.objects.filter(id = evento.id_pessoa)
-        for autores in pessoa:
-            if (evento.id_pessoa == autores.id):
-                autor = autores.nome
         for cientifico in eventoC:
-            if (evento.id == cientifico.id):
+            x = cientifico.id
+            if(evento.id == x):
                 eventoCientifico = cientifico.issn
             else:
                 eventoCientifico = 'Não é evento cientifico'
 
-        html += '<li>{}</li>'.format(
-            '<br/>Nome do Evento: ' + evento.nome + '<br/>Evento Principal: ' + evento.eventoPrincipal +
-            '<br/>Sigla: ' + evento.sigla + '<br/>Data e Hora de Inicio: ' + str(evento.dataEHoradeInicio) +
-            '<br/>Palavra Chave: ' + evento.palavraChave + '<br/>Logotipo: ' + evento.logotipo + '<br/>Autor: '
-            + autor + '<br/>Cidade: ' + evento.cidade + '-' + evento.uf + '<br/>Endereço: ' +
-            evento.endereco + '<br/>ISSN: ' + eventoCientifico + "<br/>Inscrições: " + inscricoes(evento.id))
+        html += '<li>{}</li>'.format('<br/>Nome do Evento: ' + evento.nome + '<br/>Evento Principal: '+ evento.eventoPrincipal +
+                                     '<br/>Sigla: '+ evento.sigla+ '<br/>Data e Hora de Inicio: '+ str(evento.dataEHoradeInicio) +
+                                     '<br/>Palavra Chave: ' + evento.palavraChave+ '<br/>Logotipo: '+ evento.logotipo + '<br/>Autor: '
+                                     +  evento.id_pessoa.nome +'<br/>Cidade: ' + evento.cidade +'-'+ evento.uf + '<br/>Endereço: '+
+                                     evento.endereco+ '<br/>ISSN: '+ eventoCientifico + "<br/>Inscrições: " + inscricoes(evento.id))
 
-
-    html += "<br/><br/><br/> <h1>Lista de Pessoas</h1>"
+    html += "<br/><br/><br/><h1>Lista de Pessoas</h1>"
     lista = Pessoa.objects.all()
     pf = PessoaFisica.objects.all()
     pj = PessoaJuridica.objects.all()
+    au = Autor.objects.all()
+    pa = Participante.objects.all()
     for pessoa in lista:
+        for aut in au:
+            if(aut.id == pessoa.id):
+                tipo = 'Autor'
+                html += '<li>{}</li>'.format('<br/>Nome: '+ pessoa.nome +'<br/>Email: '+ pessoa.email + '<br/>Tipo: '+ tipo + '<br/>CPF: '+aut.curriculo)
+
+
         for pef in pf:
-            if (pef.id == pessoa.id):
+            if(pef.id == pessoa.id):
                 tipo = 'Pessoa Fisica'
-                html += '<li>{}</li>'.format(
-                    '<br/>Nome: ' + pessoa.nome + '<br/>Email: ' + pessoa.email + '<br/>Tipo: ' + tipo + '<br/>CPF: ' + pef.cpf)
+                html += '<li>{}</li>'.format('<br/>Nome: '+ pessoa.nome +'<br/>Email: '+ pessoa.email + '<br/>Tipo: '+ tipo + '<br/>CPF: '+pef.cpf)
+
         for pej in pj:
-            if (pej.id == pessoa.id):
+            if( pej.id == pessoa.id):
                 tipo = 'Pessoa Juridica'
-                html += '<li>{}</li>'.format(
-                    '<br/>Nome: ' + pessoa.nome + '<br/>Email: ' + pessoa.email + '<br/>Tipo: ' + tipo + '<br/>CNPJ: ' + pej.cnpj)
+                html += '<li>{}</li>'.format('<br/>Nome: ' + pessoa.nome + '<br/>Email: ' + pessoa.email + '<br/>Tipo: ' + tipo + '<br/>CNPJ: ' + pej.cnpj)
+
     html += "<br/><br/><br/><h1>Lista de Artigos</h1>"
     artigos = ArtigoCientifico.objects.all()
-    autores = Autor.objects.all()
+    x = 'Autores: '
     for artigo in artigos:
-        for autor in autores:
-            if (artigo.id == autor.id_artigo):
-                html += '<li>{}</li>'.format(
-                    '<br/> Nome do Artigo: ' + artigo.titulo + "<br/> Autor: " + autor.nome + "<br/> Curriculo: " + autor.curriculo)
+        for autor in artigo.autores.all():
+                x += autor.nome + " | "
+        html += '<li>{}</li>'.format('<br/> Nome do Artigo: ' + artigo.titulo + "<br/>"+x)
 
     return HttpResponse(html)
-
